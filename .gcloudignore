@@ -1,0 +1,62 @@
+# This file specifies files that are *not* uploaded to Google Cloud
+# using gcloud. It follows the same syntax as .gitignore, with the addition of
+# "#!include" directives (which insert the entries of the given .gitignore-style
+# file at that point).
+
+.gcloudignore
+.git
+.gitignore
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+
+# Virtual Environment
+.venv/
+venv/
+ENV/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Environment variables
+.env
+
+# Audio files (generated)
+speech.wav
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+*.ipynb
+video-analysis.py
+video-analytics.ipynb
+
+# macOS
+.DS_Store
+
+# Documentation
+DESIGN_UPDATES.md
+README.md
+README-VERCEL.md
+DEPLOYMENT.md
+
+# Docker (not needed for Cloud Run)
+docker-compose.yml
+
+# Other platform configs
+render.yaml
+.fly.toml
+vercel.json
+requirements-vercel.txt
+api/
+public/
+
