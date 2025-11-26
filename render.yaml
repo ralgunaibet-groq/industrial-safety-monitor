@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: industrial-safety-monitor
+    env: docker
+    plan: free
+    healthCheckPath: /
+    envVars:
+      - key: PORT
+        value: 8080
+
