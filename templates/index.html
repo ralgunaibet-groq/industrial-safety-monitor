@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Industrial Safety Monitor - Powered by Groq</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+</head>
+<body>
+    <!-- Groq Badge -->
+    <div class="groq-badge">
+        <span class="groq-badge-text">Powered by Groq</span>
+    </div>
+    
+    <!-- Logout Button -->
+    <a href="/logout" class="logout-btn" title="Logout">
+        <span>Logout</span>
+    </a>
+    
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-left">
+                <img src="https://raw.githubusercontent.com/RMNCLDYO/groq-ai-toolkit/main/.github/groq-logo.png" alt="Groq Logo" class="groq-logo">
+                <div class="header-content">
+                    <h1>Real-Time Industrial Safety Monitor</h1>
+                    <p class="subtitle">AI-Powered Hazard Detection with Maverick Vision Intelligence</p>
+                </div>
+            </div>
+            <div class="header-controls">
+                <button id="startBtn" class="btn btn-primary">
+                    <span>Start Monitoring</span>
+                </button>
+                <button id="stopBtn" class="btn btn-danger" disabled>
+                    <span>Stop Monitoring</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Video Feed Section -->
+            <div class="video-section">
+                <div class="video-container">
+                    <img id="videoFeed" src="/video_feed" alt="Video Feed">
+                    <div class="video-overlay" id="videoOverlay">
+                        <div class="status-badge" id="statusBadge">
+                            <span class="status-icon">●</span>
+                            <span class="status-text">Waiting to start...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dashboard Section -->
+            <div class="dashboard-section">
+                <!-- Safety Status Card -->
+                <div class="card status-card">
+                    <div class="card-header">
+                        <h2>Safety Status</h2>
+                        <div class="severity-indicator" id="severityIndicator">
+                            <span class="severity-dot"></span>
+                            <span class="severity-text">Unknown</span>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="stat-row">
+                            <span class="stat-label">Hazard Present:</span>
+                            <span class="stat-value" id="hazardPresent">-</span>
+                        </div>
+                        <div class="stat-row">
+                            <span class="stat-label">Severity Level:</span>
+                            <span class="stat-value" id="severityLevel">-</span>
+                        </div>
+                        <div class="description-box" id="descriptionBox">
+                            <p class="description-text">No analysis data yet. Click "Start Monitoring" to begin.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Detected Hazards Card -->
+                <div class="card hazards-card">
+                    <div class="card-header">
+                        <h2>Detected Hazards</h2>
+                    </div>
+                    <div class="card-body">
+                        <div id="hazardsList" class="hazards-list">
+                            <div class="empty-state">
+                                <p>No hazards detected</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recommendations Card -->
+                <div class="card recommendations-card">
+                    <div class="card-header">
+                        <h2>Recommendations</h2>
+                    </div>
+                    <div class="card-body">
+                        <div id="recommendationsList" class="recommendations-list">
+                            <div class="empty-state">
+                                <p>No recommendations at this time</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Statistics Card -->
+                <div class="card stats-card">
+                    <div class="card-header">
+                        <h2>Session Statistics</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="stats-grid">
+                            <div class="stat-item">
+                                <div class="stat-number" id="totalAnalyses">0</div>
+                                <div class="stat-name">Total Analyses</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-number" id="hazardsFound">0</div>
+                                <div class="stat-name">Hazards Found</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-number" id="criticalAlerts">0</div>
+                                <div class="stat-name">Critical Alerts</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-number" id="uptime">00:00</div>
+                                <div class="stat-name">Monitoring Time</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>Powered by <strong>Groq</strong> Maverick AI • Lightning-Fast Real-Time Safety Monitoring</p>
+        </footer>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
+

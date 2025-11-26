@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Industrial Safety Monitor</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background: #FFFFFF;
+            background-image: 
+                radial-gradient(circle at 20% 50%, rgba(255, 107, 53, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(255, 140, 90, 0.05) 0%, transparent 50%);
+            background-attachment: fixed;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .login-container {
+            background: #FFFFFF;
+            border-radius: 24px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+            border: 2px solid #E5E7EB;
+            padding: 48px;
+            max-width: 480px;
+            width: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .login-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #FF6B35 0%, #F26A4F 50%, #FF8C5A 100%);
+            box-shadow: 0 0 20px rgba(255, 107, 53, 0.5);
+        }
+
+        .logo-container {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .groq-logo {
+            height: 60px;
+            width: auto;
+            margin-bottom: 24px;
+            filter: drop-shadow(0 4px 8px rgba(255, 107, 53, 0.2));
+        }
+
+        h1 {
+            font-size: 2rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #FF6B35 0%, #F26A4F 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+            letter-spacing: -0.02em;
+        }
+
+        .subtitle {
+            color: #6B7280;
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #1A1A2E;
+            font-size: 0.9rem;
+        }
+
+        input[type="password"],
+        input[type="text"] {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #E5E7EB;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.3s ease;
+            background: #FFFFFF;
+            color: #1A1A2E;
+        }
+
+        input[type="password"]:focus,
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #FF6B35;
+            box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #FF6B35 0%, #F26A4F 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 24px rgba(255, 107, 53, 0.4);
+            letter-spacing: 0.02em;
+        }
+
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 32px rgba(255, 107, 53, 0.6);
+        }
+
+        .btn-login:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .error-message {
+            background: rgba(255, 71, 87, 0.1);
+            border-left: 4px solid #FF4757;
+            padding: 12px 16px;
+            border-radius: 8px;
+            color: #1A1A2E;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        .info-box {
+            background: rgba(255, 107, 53, 0.05);
+            border-left: 4px solid #FF6B35;
+            padding: 16px;
+            border-radius: 8px;
+            margin-top: 24px;
+            font-size: 0.85rem;
+            color: #6B7280;
+        }
+
+        .info-box strong {
+            color: #1A1A2E;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .info-box a {
+            color: #FF6B35;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .info-box a:hover {
+            text-decoration: underline;
+        }
+
+        .toggle-visibility {
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #6B7280;
+            font-size: 0.85rem;
+            user-select: none;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        @media (max-width: 768px) {
+            .login-container {
+                padding: 32px 24px;
+            }
+
+            h1 {
+                font-size: 1.6rem;
+            }
+
+            .groq-logo {
+                height: 50px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="logo-container">
+            <img src="https://raw.githubusercontent.com/RMNCLDYO/groq-ai-toolkit/main/.github/groq-logo.png" alt="Groq Logo" class="groq-logo">
+            <h1>Industrial Safety Monitor</h1>
+            <p class="subtitle">Enter your Groq API key to continue</p>
+        </div>
+
+        <div id="errorMessage" class="error-message"></div>
+
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="apiKey">Groq API Key</label>
+                <div class="input-wrapper">
+                    <input type="password" id="apiKey" name="apiKey" placeholder="gsk_..." required>
+                    <span class="toggle-visibility" onclick="toggleVisibility()">Show</span>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-login" id="loginBtn">
+                Access Application
+            </button>
+        </form>
+
+        <div class="info-box">
+            <strong>Need a Groq API Key?</strong>
+            Get your free API key from <a href="https://console.groq.com" target="_blank">console.groq.com</a>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('loginForm');
+        const errorMessage = document.getElementById('errorMessage');
+        const loginBtn = document.getElementById('loginBtn');
+        const apiKeyInput = document.getElementById('apiKey');
+
+        function toggleVisibility() {
+            const input = document.getElementById('apiKey');
+            const toggle = document.querySelector('.toggle-visibility');
+            
+            if (input.type === 'password') {
+                input.type = 'text';
+                toggle.textContent = 'Hide';
+            } else {
+                input.type = 'password';
+                toggle.textContent = 'Show';
+            }
+        }
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const apiKey = apiKeyInput.value.trim();
+            
+            if (!apiKey) {
+                showError('Please enter your API key');
+                return;
+            }
+
+            loginBtn.disabled = true;
+            loginBtn.textContent = 'Verifying...';
+            errorMessage.classList.remove('show');
+
+            try {
+                const response = await fetch('/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ api_key: apiKey }),
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    loginBtn.textContent = 'Success! Redirecting...';
+                    window.location.href = '/';
+                } else {
+                    showError(data.error || 'Invalid API key');
+                    loginBtn.disabled = false;
+                    loginBtn.textContent = 'Access Application';
+                }
+            } catch (error) {
+                showError('Connection error. Please try again.');
+                loginBtn.disabled = false;
+                loginBtn.textContent = 'Access Application';
+            }
+        });
+
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.classList.add('show');
+        }
+    </script>
+</body>
+</html>
+
