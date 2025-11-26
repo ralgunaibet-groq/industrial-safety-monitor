@@ -1,0 +1,53 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+
+# Virtual Environment
+.venv/
+venv/
+ENV/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Git
+.git/
+.gitignore
+
+# Environment variables
+.env
+
+# Audio files (generated)
+speech.wav
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+*.ipynb
+video-analysis.py
+video-analytics.ipynb
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Documentation
+DESIGN_UPDATES.md
+
+# Logs
+*.log
+
+# Docker
+Dockerfile
+docker-compose.yml
+.dockerignore
+

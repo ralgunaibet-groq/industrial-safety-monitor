@@ -19,11 +19,32 @@ AI-powered real-time video analytics for industrial safety monitoring using Groq
 
 ### Prerequisites
 
-- Python 3.8+
+- Python 3.8+ (or Docker)
 - Webcam
 - Groq API key ([Get one here](https://console.groq.com))
 
-### Installation
+### Option 1: Docker (Recommended)
+
+**Easiest way to run the application:**
+
+1. **Install Docker**
+   - Download from [docker.com](https://www.docker.com/get-started)
+
+2. **Build and run**
+
+```bash
+cd "Video Analytics"
+docker-compose up --build
+```
+
+3. **Access the application**
+   - Open: `http://localhost:8080`
+   - Login with your Groq API key
+   - Start monitoring!
+
+**Note for macOS/Windows**: Docker Desktop doesn't support direct webcam access. You'll need to run natively (see Option 2) or use a USB webcam passthrough solution.
+
+### Option 2: Native Installation
 
 1. **Clone or navigate to the project directory**
 
@@ -86,6 +107,9 @@ Click the "Start Monitoring" button to begin real-time safety analysis.
 Video Analytics/
 ├── app.py                 # Flask backend server with AI analysis
 ├── requirements.txt       # Python dependencies
+├── Dockerfile            # Docker container configuration
+├── docker-compose.yml    # Docker Compose setup
+├── .dockerignore         # Docker ignore rules
 ├── templates/
 │   ├── index.html        # Main dashboard interface
 │   └── login.html        # Login page
@@ -133,6 +157,7 @@ HAZARD_PROMPT = "..."                 # Customize the AI instructions
 - **Computer Vision**: OpenCV
 - **Frontend**: HTML5, CSS3, JavaScript, Socket.IO
 - **Audio**: sounddevice, soundfile
+- **Deployment**: Docker, Docker Compose
 
 ## 📝 Notes
 
@@ -160,12 +185,32 @@ This project is provided as-is for demonstration purposes.
 
 Feel free to fork, modify, and improve this project!
 
+## 🐳 Docker Commands
+
+```bash
+# Build and start the container
+docker-compose up --build
+
+# Run in detached mode (background)
+docker-compose up -d
+
+# Stop the container
+docker-compose down
+
+# View logs
+docker-compose logs -f
+
+# Rebuild after code changes
+docker-compose up --build --force-recreate
+```
+
 ## 💡 Tips for Best Results
 
 - Ensure good lighting for better image analysis
 - Position the camera to capture the work area clearly
 - Test with industrial safety scenarios for accurate results
 - Monitor the console for detailed analysis logs
+- For Docker: Use native installation on macOS/Windows for webcam access
 
 ---
 

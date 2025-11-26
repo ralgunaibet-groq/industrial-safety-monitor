@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  industrial-safety-monitor:
+    build: .
+    container_name: industrial-safety-monitor
+    ports:
+      - "8080:8080"
+    devices:
+      - /dev/video0:/dev/video0  # Webcam access (Linux)
+    volumes:
+      - ./:/app
+    environment:
+      - PYTHONUNBUFFERED=1
+    restart: unless-stopped
+    stdin_open: true
+    tty: true
+
