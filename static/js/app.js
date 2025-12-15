@@ -94,6 +94,12 @@ socket.on('analysis_update', (data) => {
     updateAnalysis(data);
 });
 
+// Pipeline metrics update
+socket.on('pipeline_metrics', (metrics) => {
+    console.log('Pipeline metrics:', metrics);
+    updatePipelineMetrics(metrics);
+});
+
 // Update Analysis Display
 function updateAnalysis(data) {
     if (!data) return;
@@ -276,6 +282,61 @@ function playAlertSound() {
     } catch (error) {
         console.error('Failed to play alert sound:', error);
     }
+}
+
+// Update Pipeline Metrics Display
+function updatePipelineMetrics(metrics) {
+    // Create or update metrics display
+    let metricsContainer = document.getElementById('pipelineMetrics');
+    
+    if (!metricsContainer) {
+        // Create metrics container if it doesn't exist
+        metricsContainer = document.createElement('div');
+        metricsContainer.id = 'pipelineMetrics';
+        metricsContainer.className = 'metrics-container';
+        metricsContainer.style.cssText = `
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            border-radius: 12px;
+            padding: 16px;
+            margin-top: 16px;
+            color: white;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 12px;
+        `;
+        
+        // Find a good place to insert it (after statistics)
+        const statsContainer = document.querySelector('.stats-grid') || document.querySelector('.card');
+        if (statsContainer && statsContainer.parentNode) {
+            statsContainer.parentNode.insertBefore(metricsContainer, statsContainer.nextSibling);
+        } else {
+            document.body.appendChild(metricsContainer);
+        }
+    }
+    
+    metricsContainer.innerHTML = `
+        <h4 style="margin: 0 0 12px 0; color: #60a5fa; font-size: 14px;">⚡ Pipeline Latency Metrics</h4>
+        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;">
+            <div style="background: rgba(255,255,255,0.1); padding: 10px; border-radius: 8px;">
+                <div style="color: #94a3b8; font-size: 10px; text-transform: uppercase;">Full Pipeline</div>
+                <div style="font-size: 20px; font-weight: bold; color: #22c55e;">${metrics.last_pipeline_latency_ms}ms</div>
+            </div>
+            <div style="background: rgba(255,255,255,0.1); padding: 10px; border-radius: 8px;">
+                <div style="color: #94a3b8; font-size: 10px; text-transform: uppercase;">Average</div>
+                <div style="font-size: 20px; font-weight: bold; color: #60a5fa;">${metrics.avg_pipeline_latency_ms}ms</div>
+            </div>
+            <div style="background: rgba(255,255,255,0.1); padding: 10px; border-radius: 8px;">
+                <div style="color: #94a3b8; font-size: 10px; text-transform: uppercase;">Vision API</div>
+                <div style="font-size: 16px; font-weight: bold; color: #f59e0b;">${metrics.last_vision_latency_ms}ms</div>
+            </div>
+            <div style="background: rgba(255,255,255,0.1); padding: 10px; border-radius: 8px;">
+                <div style="color: #94a3b8; font-size: 10px; text-transform: uppercase;">TTS Generation</div>
+                <div style="font-size: 16px; font-weight: bold; color: #a855f7;">${metrics.last_tts_latency_ms}ms</div>
+            </div>
+        </div>
+        <div style="margin-top: 10px; color: #64748b; font-size: 10px; text-align: center;">
+            ${metrics.total_measurements} measurement${metrics.total_measurements !== 1 ? 's' : ''} • Frame capture → Audio playback
+        </div>
+    `;
 }
 
 // Initialize

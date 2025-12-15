@@ -51,6 +51,16 @@ active_incident = False  # Whether we currently have an active hazard
 stop_playback_flag = False  # Signal to interrupt current audio
 last_announcement_time = 0  # Track when last announcement was made
 
+# Pipeline latency metrics
+pipeline_metrics = {
+    "last_pipeline_latency_ms": 0,
+    "last_vision_latency_ms": 0,
+    "last_tts_latency_ms": 0,
+    "avg_pipeline_latency_ms": 0,
+    "total_measurements": 0,
+    "sum_latency_ms": 0,
+}
+
 # Hazard lifecycle flags help avoid redundant TTS and UI churn
 STATUS_NEW_HAZARD = "new_hazard"
 STATUS_SAME_HAZARD = "same_hazard"
@@ -221,7 +231,8 @@ def announce_situation_clear():
     clear_announcement_queue()
     if status_changed:
         try:
-            announcement_queue.put("Situation clear. Area is safe. Resume normal operations.", block=False)
+            # Queue tuple: (text, start_time) - use current time for clear announcements
+            announcement_queue.put(("Situation clear. Area is safe. Resume normal operations.", time.time()), block=False)
             last_announcement_time = time.time()
         except:
             print("[WARN] Could not queue clear announcement (queue full)")
@@ -233,6 +244,7 @@ def announce_situation_clear():
 def tts_announcement_worker():
     """Background worker that processes the announcement queue."""
     global groq_client, tts_in_progress, announcement_queue, analysis_active, stop_playback_flag
+    global pipeline_metrics
     
     print("[TTS] Announcement worker started")
     
@@ -240,9 +252,16 @@ def tts_announcement_worker():
         try:
             # Get announcement from queue (with timeout)
             try:
-                announcement_text = announcement_queue.get(timeout=1)
+                queue_item = announcement_queue.get(timeout=1)
             except:
                 continue
+            
+            # Handle both tuple (text, start_time) and legacy string format
+            if isinstance(queue_item, tuple):
+                announcement_text, pipeline_start_time = queue_item
+            else:
+                announcement_text = queue_item
+                pipeline_start_time = None
             
             if not announcement_text or groq_client is None:
                 try:
@@ -261,6 +280,7 @@ def tts_announcement_worker():
                         
                         # Generate speech
                         print(f"[TTS] Generating: {announcement_text}")
+                        tts_start_time = time.time()
                         response = groq_client.audio.speech.create(
                             model="playai-tts",
                             voice="Aaliyah-PlayAI",
@@ -271,6 +291,11 @@ def tts_announcement_worker():
                         # Save to file
                         with open(speech_file_path, "wb") as f:
                             f.write(response.read())
+                        
+                        tts_end_time = time.time()
+                        tts_latency_ms = (tts_end_time - tts_start_time) * 1000
+                        pipeline_metrics["last_tts_latency_ms"] = round(tts_latency_ms, 2)
+                        print(f"[METRICS] TTS generation latency: {tts_latency_ms:.2f}ms")
                         
                         # Play audio with comprehensive error handling
                         try:
@@ -289,6 +314,26 @@ def tts_announcement_worker():
                             # Play with error handling
                             stop_playback_flag = False
                             try:
+                                # Calculate and log full pipeline latency
+                                audio_start_time = time.time()
+                                if pipeline_start_time:
+                                    pipeline_latency_ms = (audio_start_time - pipeline_start_time) * 1000
+                                    pipeline_metrics["last_pipeline_latency_ms"] = round(pipeline_latency_ms, 2)
+                                    pipeline_metrics["total_measurements"] += 1
+                                    pipeline_metrics["sum_latency_ms"] += pipeline_latency_ms
+                                    pipeline_metrics["avg_pipeline_latency_ms"] = round(
+                                        pipeline_metrics["sum_latency_ms"] / pipeline_metrics["total_measurements"], 2
+                                    )
+                                    print(f"\n{'='*60}")
+                                    print(f"[METRICS] 🎯 FULL PIPELINE LATENCY: {pipeline_latency_ms:.2f}ms")
+                                    print(f"[METRICS]    Vision API: {pipeline_metrics['last_vision_latency_ms']:.2f}ms")
+                                    print(f"[METRICS]    TTS Generation: {pipeline_metrics['last_tts_latency_ms']:.2f}ms")
+                                    print(f"[METRICS]    Average Pipeline: {pipeline_metrics['avg_pipeline_latency_ms']:.2f}ms ({pipeline_metrics['total_measurements']} samples)")
+                                    print(f"{'='*60}\n")
+                                    
+                                    # Emit metrics to frontend
+                                    socketio.emit('pipeline_metrics', pipeline_metrics)
+                                
                                 sd.play(data, samplerate, blocking=False)
                                 
                                 # Wait manually with checks (faster polling)
@@ -461,6 +506,7 @@ def analysis_worker():
     """Background thread that analyzes frames periodically."""
     global camera, analysis_active, latest_analysis, groq_client, announcement_queue
     global last_incident_description, active_incident, current_status_flag, last_announcement_time
+    global pipeline_metrics
     
     last_analysis_time = 0
     
@@ -476,8 +522,18 @@ def analysis_worker():
                 
                 ret, frame = camera.read()
                 if ret:
+                    # Start pipeline latency measurement
+                    pipeline_start_time = time.time()
+                    
                     print("[INFO] Analyzing frame...")
+                    vision_start_time = time.time()
                     analysis = analyze_frame(frame)
+                    vision_end_time = time.time()
+                    
+                    # Track vision API latency
+                    vision_latency_ms = (vision_end_time - vision_start_time) * 1000
+                    pipeline_metrics["last_vision_latency_ms"] = round(vision_latency_ms, 2)
+                    print(f"[METRICS] Vision API latency: {vision_latency_ms:.2f}ms")
                     
                     if not analysis:
                         continue
@@ -514,7 +570,8 @@ def analysis_worker():
                             if now_time - last_announcement_time >= MIN_ANNOUNCEMENT_INTERVAL:
                                 announcement = build_announcement_text(severity, desc, recommended)
                                 try:
-                                    announcement_queue.put(announcement, block=False)
+                                    # Queue tuple: (text, pipeline_start_time) for latency tracking
+                                    announcement_queue.put((announcement, pipeline_start_time), block=False)
                                     last_announcement_time = now_time
                                     print(f"[INFO] Announcement queued (queue size: {announcement_queue.qsize()})")
                                 except:
@@ -654,6 +711,7 @@ def start_analysis():
     """Start video analysis."""
     global camera, analysis_active, groq_client, announcement_queue
     global last_incident_description, active_incident, last_announcement_time
+    global pipeline_metrics
     
     # Use API key from session
     api_key = session.get('api_key')
@@ -665,6 +723,16 @@ def start_analysis():
     active_incident = False
     last_announcement_time = 0
     update_status_flag(STATUS_CLEARED)
+    
+    # Reset pipeline metrics for new session
+    pipeline_metrics = {
+        "last_pipeline_latency_ms": 0,
+        "last_vision_latency_ms": 0,
+        "last_tts_latency_ms": 0,
+        "avg_pipeline_latency_ms": 0,
+        "total_measurements": 0,
+        "sum_latency_ms": 0,
+    }
     
     if camera is None:
         camera = cv2.VideoCapture(0)
@@ -733,6 +801,22 @@ def get_status():
     return jsonify({
         "active": analysis_active,
         "latest_analysis": latest_analysis
+    })
+
+
+@app.route('/metrics')
+@login_required
+def get_metrics():
+    """Get pipeline latency metrics."""
+    return jsonify({
+        "pipeline_metrics": pipeline_metrics,
+        "description": {
+            "last_pipeline_latency_ms": "Time from frame capture to audio playback start",
+            "last_vision_latency_ms": "Time for Groq vision API to analyze frame",
+            "last_tts_latency_ms": "Time for Groq TTS API to generate speech",
+            "avg_pipeline_latency_ms": "Running average of pipeline latency",
+            "total_measurements": "Number of latency measurements taken"
+        }
     })
 
 
