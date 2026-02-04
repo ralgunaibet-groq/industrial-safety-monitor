@@ -18,6 +18,7 @@ import soundfile as sf
 from pathlib import Path
 from functools import wraps
 from queue import Queue, Empty
+from hazard_config import get_hazard_prompt, HazardConfigError
 
 # Load environment variables from .env file if it exists
 def load_env_file():
@@ -73,34 +74,12 @@ MIN_ANNOUNCEMENT_INTERVAL = 3.0  # Minimum seconds between announcements
 # Configuration
 ANALYZE_EVERY_SECONDS = 0.5  # Fast detection - analyze every 0.5 seconds
 
-# Hazard detection prompt
-HAZARD_PROMPT = """
-You are an industrial safety inspector looking at a live camera feed
-from an industrial site (factory, plant, warehouse, refinery, construction, etc.).
-
-Your job is to:
-- Detect any visible safety hazards or dangerous situations.
-- Focus on things like:
-  - There is no PPE (no helmet, no safety vest, no goggles, no gloves)
-  - People too close to moving machinery or vehicles (forklifts, trucks, cranes)
-  - Working at height without fall protection
-  - Trip and fall hazards (cables, clutter, obstacles on floor)
-  - Fire, smoke, sparks, exposed hot surfaces, spills or leaks
-  - People in restricted zones or near dangerous equipment
-  - Blocked emergency exits or escape routes
-- If nothing looks unsafe, say so clearly.
-
-Respond ONLY as valid JSON with this exact structure:
-{
-  "hazard_present": true or false,
-  "severity": "none" | "low" | "medium" | "high" | "critical",
-  "hazard_types": [list of short strings],
-  "description": "one or two sentences describing the scene and any hazards",
-  "recommended_actions": [list of short actionable recommendations]
-}
-
-Do not include any text before or after the JSON.
-"""
+# Load hazard detection prompt from config
+try:
+    HAZARD_PROMPT = get_hazard_prompt()
+except HazardConfigError as e:
+    print(f"[ERROR] Failed to load hazard configuration: {e}")
+    raise SystemExit(1)
 
 
 def frame_to_base64_jpeg(frame):

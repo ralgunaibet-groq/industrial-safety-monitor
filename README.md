@@ -141,13 +141,60 @@ Video Analytics/
 
 ## 🔧 Configuration
 
+### Hazard Categories
+
+You can customize which hazards to monitor by editing `config.yaml`. Each hazard category can be enabled or disabled independently:
+
+```yaml
+hazard_categories:
+  - id: missing_ppe
+    name: Missing PPE
+    description: "No PPE (no helmet, no safety vest, no goggles, no gloves)"
+    enabled: true
+
+  - id: machinery_proximity
+    name: Machinery Proximity
+    description: "People too close to moving machinery or vehicles (forklifts, trucks, cranes)"
+    enabled: true
+
+  - id: fall_hazard
+    name: Fall Hazard
+    description: "Working at height without fall protection"
+    enabled: true
+
+  - id: trip_hazard
+    name: Trip and Fall Hazard
+    description: "Trip and fall hazards (cables, clutter, obstacles on floor)"
+    enabled: true
+
+  - id: fire_hazard
+    name: Fire and Chemical Hazard
+    description: "Fire, smoke, sparks, exposed hot surfaces, spills or leaks"
+    enabled: true
+
+  - id: restricted_zone
+    name: Restricted Zone Violation
+    description: "People in restricted zones or near dangerous equipment"
+    enabled: true
+
+  - id: blocked_exit
+    name: Blocked Emergency Exit
+    description: "Blocked emergency exits or escape routes"
+    enabled: true
+```
+
+To disable a hazard category, set `enabled: false`. You can also add custom hazard categories by adding new entries with unique `id` values.
+
+If `config.yaml` is not present, the application uses sensible defaults matching all the hazard categories above.
+
+### Application Settings
+
 You can modify these settings in `app.py`:
 
 ```python
 ANALYZE_EVERY_SECONDS = 0.5           # Analysis frequency (seconds)
 MIN_ANNOUNCEMENT_INTERVAL = 3.0       # Minimum time between announcements
 announcement_queue = Queue(maxsize=5) # Max queued announcements
-HAZARD_PROMPT = "..."                 # Customize the AI instructions
 ```
 
 ## 🛠️ Technologies Used
