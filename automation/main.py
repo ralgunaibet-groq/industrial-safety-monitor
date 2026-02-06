@@ -93,8 +93,21 @@ def get_session_details(session_id: str) -> dict:
     return resp.json()
 
 
+def send_session_message(session_id: str, message: str) -> dict:
+    url = f"{DEVIN_API_URL}/{session_id}/message"
+    headers = {
+        "Authorization": f"Bearer {DEVIN_API_KEY}",
+        "Content-Type": "application/json",
+    }
+    resp = requests.post(url, headers=headers, json={"message": message}, timeout=30)
+    resp.raise_for_status()
+    return resp.json()
+
+
 def poll_session_until_done(session_id: str, label: str) -> dict:
     console.print(f"\n[bold blue]Polling {label} session: {session_id}[/bold blue]")
+    blocked_nudges = 0
+    max_blocked_nudges = 3
     for attempt in range(1, MAX_POLL_ATTEMPTS + 1):
         details = get_session_details(session_id)
         status = details.get("status_enum", details.get("status", "unknown"))
@@ -106,6 +119,21 @@ def poll_session_until_done(session_id: str, label: str) -> dict:
         if status in ("expired", "error"):
             console.print(f"[bold red]Session ended with status: {status}[/bold red]")
             return details
+        if status == "blocked" and blocked_nudges < max_blocked_nudges:
+            blocked_nudges += 1
+            console.print(
+                f"  [yellow]Session is blocked. Sending nudge ({blocked_nudges}/{max_blocked_nudges})...[/yellow]"
+            )
+            nudge = (
+                "Please continue and complete the task. "
+                "Output your final result as JSON: "
+                '{"confidence_score": <0-100>, "reasoning": "<text>"}\n'
+                "Then stop working."
+            )
+            try:
+                send_session_message(session_id, nudge)
+            except requests.RequestException as exc:
+                console.print(f"  [dim]Nudge failed: {exc}[/dim]")
         time.sleep(POLL_INTERVAL_SECONDS)
     console.print("[bold red]Polling timed out.[/bold red]")
     return get_session_details(session_id)
