@@ -48,7 +48,7 @@ def fetch_open_issues() -> list[dict]:
         "Authorization": f"token {GITHUB_TOKEN}",
         "Accept": "application/vnd.github+json",
     }
-    params = {"state": "open", "per_page": 25, "sort": "created", "direction": "desc"}
+    params = {"state": "open", "per_page": 25, "sort": "created", "direction": "asc"}
     resp = requests.get(url, headers=headers, params=params, timeout=30)
     resp.raise_for_status()
     issues = [i for i in resp.json() if "pull_request" not in i]
