@@ -6,11 +6,15 @@ import os
 import re
 import sys
 import time
+from pathlib import Path
 
 import requests
+from dotenv import load_dotenv
 from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
+
+load_dotenv(Path(__file__).resolve().parent / ".env")
 
 console = Console()
 

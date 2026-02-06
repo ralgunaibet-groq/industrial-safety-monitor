@@ -19,10 +19,21 @@ A Python CLI tool that integrates the Devin API with GitHub Issues to automatica
 ### 1. Install dependencies
 
 ```bash
-pip install rich requests
+pip install rich requests python-dotenv
 ```
 
-### 2. Export environment variables
+### 2. Configure environment variables
+
+Create a `.env` file inside the `automation/` directory:
+
+```bash
+GITHUB_TOKEN="ghp_your_github_token"
+GITHUB_REPO="owner/repo-name"
+DEVIN_API_KEY="apk_user_your_devin_api_key"
+DEVIN_API_URL="https://api.devin.ai/v1/sessions"
+```
+
+Alternatively, export them directly in your shell:
 
 ```bash
 export GITHUB_TOKEN="ghp_your_github_token"
