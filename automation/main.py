@@ -256,7 +256,7 @@ def run_scoping_phase(issue: dict) -> dict | None:
     if result:
         score = result.get("confidence_score", 0)
         reasoning = result.get("reasoning", "N/A")
-        color = "green" if score > 80 else "yellow" if score > 50 else "red"
+        color = "green" if score > 70 else "yellow" if score > 50 else "red"
         console.print(
             Panel(
                 f"[bold]Confidence Score:[/bold] [{color}]{score}[/{color}]\n"
@@ -364,15 +364,15 @@ def main() -> None:
         sys.exit(1)
 
     score = scoping_result.get("confidence_score", 0)
-    if score > 80:
+    if score > 70:
         console.print(
-            f"\n[bold green]Confidence score {score} > 80. "
+            f"\n[bold green]Confidence score {score} > 70. "
             f"Proceeding to execution phase.[/bold green]\n"
         )
         run_execution_phase(target_issue, scoping_result)
     else:
         console.print(
-            f"\n[bold yellow]Confidence score {score} <= 80. "
+            f"\n[bold yellow]Confidence score {score} <= 70. "
             f"Skipping execution phase. Manual review recommended.[/bold yellow]\n"
         )
 
