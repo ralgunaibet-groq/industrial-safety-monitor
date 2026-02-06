@@ -18,6 +18,7 @@ import soundfile as sf
 from pathlib import Path
 from functools import wraps
 from queue import Queue, Empty
+from hazard_config import build_hazard_prompt, get_incident_keywords
 
 # Load environment variables from .env file if it exists
 def load_env_file():
@@ -73,34 +74,8 @@ MIN_ANNOUNCEMENT_INTERVAL = 3.0  # Minimum seconds between announcements
 # Configuration
 ANALYZE_EVERY_SECONDS = 0.5  # Fast detection - analyze every 0.5 seconds
 
-# Hazard detection prompt
-HAZARD_PROMPT = """
-You are an industrial safety inspector looking at a live camera feed
-from an industrial site (factory, plant, warehouse, refinery, construction, etc.).
-
-Your job is to:
-- Detect any visible safety hazards or dangerous situations.
-- Focus on things like:
-  - There is no PPE (no helmet, no safety vest, no goggles, no gloves)
-  - People too close to moving machinery or vehicles (forklifts, trucks, cranes)
-  - Working at height without fall protection
-  - Trip and fall hazards (cables, clutter, obstacles on floor)
-  - Fire, smoke, sparks, exposed hot surfaces, spills or leaks
-  - People in restricted zones or near dangerous equipment
-  - Blocked emergency exits or escape routes
-- If nothing looks unsafe, say so clearly.
-
-Respond ONLY as valid JSON with this exact structure:
-{
-  "hazard_present": true or false,
-  "severity": "none" | "low" | "medium" | "high" | "critical",
-  "hazard_types": [list of short strings],
-  "description": "one or two sentences describing the scene and any hazards",
-  "recommended_actions": [list of short actionable recommendations]
-}
-
-Do not include any text before or after the JSON.
-"""
+# Hazard detection prompt (built dynamically from hazard_config.yaml)
+HAZARD_PROMPT = build_hazard_prompt()
 
 
 def frame_to_base64_jpeg(frame):
@@ -407,36 +382,13 @@ from difflib import SequenceMatcher
 def extract_incident_core(description):
     """Extract the core elements of an incident for comparison."""
     desc_lower = description.lower()
-    
-    # Extract key elements
-    actors = []
-    actions = []
-    objects = []
-    locations = []
-    
-    # Actors
-    if 'worker' in desc_lower or 'person' in desc_lower:
-        actors.append('worker')
-    
-    # Actions
-    action_words = ['sitting', 'lying', 'kneeling', 'crouching', 'standing', 
-                    'handling', 'lifting', 'kicking', 'playing', 'operating']
-    for word in action_words:
-        if word in desc_lower:
-            actions.append(word)
-    
-    # Objects
-    object_words = ['forklift', 'box', 'boxes', 'ball', 'machinery', 'vehicle']
-    for word in object_words:
-        if word in desc_lower:
-            objects.append(word)
-    
-    # Locations
-    location_words = ['floor', 'ground', 'warehouse', 'shelf']
-    for word in location_words:
-        if word in desc_lower:
-            locations.append(word)
-    
+    keywords = get_incident_keywords()
+
+    actors = [w for w in keywords["actors"] if w in desc_lower]
+    actions = [w for w in keywords["actions"] if w in desc_lower]
+    objects = [w for w in keywords["objects"] if w in desc_lower]
+    locations = [w for w in keywords["locations"] if w in desc_lower]
+
     return {
         'actors': set(actors),
         'actions': set(actions),

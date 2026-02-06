@@ -6,4 +6,5 @@ numpy>=2.0.0,<2.3.0
 sounddevice==0.4.7
 soundfile==0.12.1
 python-socketio==5.10.0
+pyyaml==6.0.2
 

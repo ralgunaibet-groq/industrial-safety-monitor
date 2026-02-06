@@ -1,0 +1,56 @@
+hazard_categories:
+  - name: Missing PPE
+    enabled: true
+    description: "No helmet, no safety vest, no goggles, no gloves"
+
+  - name: Proximity to machinery
+    enabled: true
+    description: "People too close to moving machinery or vehicles (forklifts, trucks, cranes)"
+
+  - name: Working at height
+    enabled: true
+    description: "Working at height without fall protection"
+
+  - name: Trip and fall hazards
+    enabled: true
+    description: "Cables, clutter, obstacles on floor"
+
+  - name: Fire and chemical hazards
+    enabled: true
+    description: "Fire, smoke, sparks, exposed hot surfaces, spills or leaks"
+
+  - name: Restricted zones
+    enabled: true
+    description: "People in restricted zones or near dangerous equipment"
+
+  - name: Blocked exits
+    enabled: true
+    description: "Blocked emergency exits or escape routes"
+
+incident_keywords:
+  actors:
+    - worker
+    - person
+  actions:
+    - sitting
+    - lying
+    - kneeling
+    - crouching
+    - standing
+    - handling
+    - lifting
+    - kicking
+    - playing
+    - operating
+  objects:
+    - forklift
+    - box
+    - boxes
+    - ball
+    - machinery
+    - vehicle
+  locations:
+    - floor
+    - ground
+    - warehouse
+    - shelf
